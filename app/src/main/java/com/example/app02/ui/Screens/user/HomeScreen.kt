@@ -1,5 +1,6 @@
 package com.example.app02.ui.Screens.user
 
+import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,8 +33,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 
 import androidx.compose.material3.Surface
@@ -50,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -164,13 +169,15 @@ fun HomeScreen(
                     contentPadding = PaddingValues(16.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(movieViewModel.movies.value) { movie ->
-                        MovieItem(movie, navController)
-                    }
 
                     item(span = { GridItemSpan(2) }) {
                         AutoSlidingCarousel(movies = movies, navController)
                     }
+                    items(movieViewModel.movies.value) { movie ->
+                        MovieItem(movie, navController)
+                    }
+
+
                 }
             }
         }
@@ -200,9 +207,11 @@ fun MovieItem(movie: Movie, navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-
+            val painter = rememberAsyncImagePainter(
+                model = if (movie.poster.startsWith("content://")) Uri.parse(movie.poster) else movie.poster
+            )
             Image(
-                painter = rememberAsyncImagePainter(model = movie.poster),
+                painter = painter,
                 contentDescription = "Movie Poster",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -213,6 +222,15 @@ fun MovieItem(movie: Movie, navController: NavController) {
             DemoBoldTextComponent(value = movie.title)
             LightTextComponent(value = "Thể loại: ${movie.genre.name}")
             LightTextComponent(value = "Thời lượng: ${movie.duration} phút")
+            Row {
+
+                LightTextComponent(value = " ${movie.avg} ")
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = "avg",
+                    tint = Color.Yellow
+                )
+            }
         }
     }
 }
@@ -230,6 +248,7 @@ fun AutoSlidingCarousel(
 
     val pagerState = rememberPagerState(initialPage = 0) { movies.size }
     val coroutineScope = rememberCoroutineScope()
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
     LaunchedEffect(pagerState) {
         while (true) {
@@ -249,7 +268,7 @@ fun AutoSlidingCarousel(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(bcl)
-                .aspectRatio(3f / 5f)
+                .height(screenHeight/3)
                 .padding(8.dp)
         ) {
             HorizontalPager(
@@ -257,7 +276,35 @@ fun AutoSlidingCarousel(
                 modifier = Modifier.fillMaxSize()
             ) { page ->
                 val movie = movies[page]
-                MovieItem(movie, navController = navController)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(bcl)
+                        .customShadow(
+                            color = boxshadow,
+                            alpha = 0.2f,
+                            borderRadius = 16.dp,
+                            shadowRadius = 10.dp,
+                            offsetX = 4.dp,
+                            offsetY = 4.dp
+                        )
+                        .clip(RoundedCornerShape(16.dp))
+                        .padding(8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                Image(
+                    painter = rememberAsyncImagePainter(model = movie.poster),
+                    contentDescription = "Movie Poster",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { navController.navigate("movieDetail/${movie.id}") }
+//                        .height(screenHeight/3)
+                        .clip(RoundedCornerShape(12.dp))
+                )}}
             }
         }
 

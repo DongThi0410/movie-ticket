@@ -14,6 +14,7 @@ import com.example.app02.network.models.User
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.Field
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -21,6 +22,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 interface ApiService {
     @POST("auth/login")
@@ -115,7 +117,31 @@ interface ApiService {
 
     @POST("auth/reset-password")
     suspend fun resetPassword(@Body request: ResetPasswordRequest): Response<ResponseBody>
+
+    @POST("public/schedule")
+    suspend fun schedule(@Body time: ScheduleRequest): Response<ResponseBody>
+
+    @POST("public/schedule-movie")
+    suspend fun scheduleByMovie(@Body req: ScheduleMovieRequest): Response<ResponseBody>
+
+    @GET("public/count-seat/{showtimeId}")
+    suspend fun countSeat(@Path("showtimeId") showtimeId: Int): Response<Int?>
 }
+data class ScheduleRequest(
+    val fromDate: String,
+    val toDate: String,
+    val dailyStart: String,
+    val dailyEnd: String
+
+)
+data class ScheduleMovieRequest(
+    val movieId: Int,
+    val fromDate: String,
+    val toDate: String,
+    val dailyStart: String,
+    val dailyEnd: String
+)
+
 
 data class MovieSearch(
     val id: Int,

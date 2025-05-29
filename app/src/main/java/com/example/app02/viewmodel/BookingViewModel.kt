@@ -1,6 +1,8 @@
 package com.example.app02.viewmodel
 
 import android.app.Application
+import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -25,6 +27,9 @@ class BookingViewModel(application: Application) : AndroidViewModel(application)
     private val _bookingState = MutableStateFlow<BookState>(BookState.Loading)
     val bookingState: StateFlow<BookState> = _bookingState
     val dataStore = DataStore(application)
+
+    private val _counted = MutableStateFlow<Int?>(0)
+    val counted: StateFlow<Int?> = _counted.asStateFlow()
 
     private val _state = MutableStateFlow<Int?>(0)
     val state: StateFlow<Int?> = _state.asStateFlow()
@@ -104,6 +109,19 @@ class BookingViewModel(application: Application) : AndroidViewModel(application)
             } catch (e: Exception) {
                 _state.value = 0
                 onResult(false)
+            }
+        }
+    }
+
+    fun countSeat(showtimeId: Int){
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.apiService.countSeat(showtimeId)
+                if (response.isSuccessful) {
+                    _counted.value = response.body() ?: 0
+                }
+            }catch (e: Exception){
+                Log.e("dem ghe loi ", "${e}")
             }
         }
     }

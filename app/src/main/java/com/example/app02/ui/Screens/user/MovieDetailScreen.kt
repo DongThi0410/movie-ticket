@@ -128,7 +128,6 @@ fun MovieShowtimes(
     LaunchedEffect(movieId) {
         snapshotFlow { selectedDate }
             .collectLatest { date ->
-                val formattedDate = date.format(dateFormatter)
                 showtimeViewModel.fetchShowtimes(movieId.toInt(), date.format(dateFormatter))
             }
     }

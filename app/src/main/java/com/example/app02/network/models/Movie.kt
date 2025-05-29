@@ -12,7 +12,7 @@ data class Movie(
     val deleted: Boolean? = false,
     val poster: String,
     val cast: String,
-    val rating: Float,
+    val avg: Double,
     val director: String,
     val startDate: String,
     val endDate: String,

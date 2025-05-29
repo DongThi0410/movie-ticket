@@ -1,8 +1,11 @@
 package com.example.app02.ui.Screens.admin.MovieManage
 
 import android.app.DatePickerDialog
+import android.net.Uri
 import android.widget.CalendarView
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,6 +33,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.DateRange
@@ -106,7 +110,7 @@ import java.time.ZoneId
 import java.util.Calendar
 
 @Composable
-fun MovieManageSceen(
+fun MovieManageScreen(
     loginViewModel: LoginViewModel,
     navController: NavController,
     movieViewModel: MovieViewModel = viewModel(),
@@ -267,8 +271,12 @@ fun MovieList(
                 ) {
                     Row {
                         Box(modifier = Modifier.weight(1f)) {
+                            val painter = rememberAsyncImagePainter(
+                                model = if (movie.poster.startsWith("content://")) Uri.parse(movie.poster) else movie.poster
+                            )
+
                             Image(
-                                painter = rememberAsyncImagePainter(model = movie.poster),
+                                painter = painter,
                                 contentDescription = "Movie Poster",
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier
@@ -276,6 +284,7 @@ fun MovieList(
                                     .size(400.dp)
                                     .padding(8.dp)
                             )
+
 
                         }
                         Box(modifier = Modifier.weight(3f)) {
@@ -313,7 +322,7 @@ fun NewMovieScreen(
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf("") }
-    var posterUrl by remember { mutableStateOf("") }
+    var posterUri by remember { mutableStateOf<Uri?>(null) }
     var cast by remember { mutableStateOf("") }
     var director by remember { mutableStateOf("") }
     var trailer by remember { mutableStateOf("") }
@@ -328,10 +337,17 @@ fun NewMovieScreen(
     val genres = listOf(
         Genre(1, "Hành động"),
         Genre(2, "Kinh dị "),
-        Genre(3, "Hài huóc"),
+        Genre(3, "Hài hước"),
         Genre(3, "Tình cảm"),
         Genre(3, "Gia đình")
     )
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        posterUri = uri
+    }
+
 
     LazyColumn(
         modifier = Modifier
@@ -389,12 +405,23 @@ fun NewMovieScreen(
         }
 
         item {
-            MyTextField(
-                "Poster URL",
-                leadingIconVector = Icons.Default.Image,
-                value = posterUrl,
-                onValueChange = { posterUrl = it }
-            )
+            Text("Poster phim",  style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(start=8.dp, bottom = 4.dp))
+            Box(modifier = Modifier.fillMaxWidth().height(200.dp).clip(RoundedCornerShape(12.dp)).background(Color.Gray.copy(alpha = 0.2f)).clickable {
+                launcher.launch("image/*")
+            },
+                contentAlignment = Alignment.Center){
+                if (posterUri != null){
+                    Image(
+                        painter = rememberAsyncImagePainter(posterUri),
+                        contentDescription = "poster",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }else{
+                    Text("Cham de chon", color = Color.Gray)
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
         item {
@@ -431,7 +458,7 @@ fun NewMovieScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp) // ✅ tránh lỗi scroll vô hạn
+                    .height(300.dp)
                     .padding(bottom = 16.dp)
             ) {
                 AndroidView(
@@ -512,9 +539,9 @@ fun NewMovieScreen(
                     des = description,
                     genre = selectedGenre,
                     duration = duration.toInt(),
-                    poster = posterUrl,
+                    poster = posterUri.toString() ?: "",
                     cast = cast,
-                    rating = 0.0f,
+                    avg = 0.0,
                     director = director,
                     startDate = start,
                     endDate = end,
@@ -522,10 +549,14 @@ fun NewMovieScreen(
                     trailer = trailer
                 )
                 movieViewModel.newMovie(movie) { success ->
-                    if (success)
+                    if (success) {
                         Toast.makeText(context, "Thêm phim thành công", Toast.LENGTH_SHORT).show()
+                        movieViewModel.fetchMovies()
+                        navController.popBackStack()
+
+                    }
                     else
-                        Toast.makeText(context, "Thêm phim thất bại", Toast.LENGTH_SHORT).show()
+                    { Toast.makeText(context, "Thêm phim thất bại", Toast.LENGTH_SHORT).show() }
 
                 }
             })

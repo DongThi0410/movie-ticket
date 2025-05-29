@@ -64,14 +64,14 @@ fun MovieDetailScreen(
         movie?.let {
             Column(modifier = Modifier.padding(p)) {
                 CommonHeader(it.title, navController)
-                MovieDetailContent(id, it, movieViewModel)
+                MovieDetailContent(id, it, movieViewModel, navController)
             }
         }
     }
 }
 
 @Composable
-fun MovieDetailContent(id: Int, movie: Movie?, movieViewModel: MovieViewModel) {
+fun MovieDetailContent(id: Int, movie: Movie?, movieViewModel: MovieViewModel, navController: NavController) {
 
     val context = LocalContext.current
     movie?.let {
@@ -115,7 +115,7 @@ fun MovieDetailContent(id: Int, movie: Movie?, movieViewModel: MovieViewModel) {
 
                 }
             })
-
+Spacer(modifier = Modifier.padding(16.dp))
             IconButton(
                 modifier = Modifier.fillMaxWidth(0.45f)
                     .height(45.dp).background(
@@ -126,6 +126,7 @@ fun MovieDetailContent(id: Int, movie: Movie?, movieViewModel: MovieViewModel) {
                     movieViewModel.deleteMov(id) { success ->
                         if (success) {
                             Toast.makeText(context, "Xóa thành công", Toast.LENGTH_SHORT).show()
+                            navController.popBackStack()
                         } else {
                             Toast.makeText(context, "Xóa thất bại", Toast.LENGTH_SHORT).show()
                         }

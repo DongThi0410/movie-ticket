@@ -22,8 +22,11 @@ import com.example.app02.ui.Screens.user.MovieDetailScreen
 import com.example.app02.ui.Screens.user.PaymentScreen
 import com.example.app02.ui.Screens.user.ShowSeatScreen
 import com.example.app02.ui.Screens.SignupScreen
-import com.example.app02.ui.Screens.admin.MovieManage.MovieManageSceen
+import com.example.app02.ui.Screens.admin.MovieManage.CreateScheduleScreen
+import com.example.app02.ui.Screens.admin.MovieManage.MovieManageScreen
 import com.example.app02.ui.Screens.admin.MovieManage.MovieDetailScreen
+import com.example.app02.ui.Screens.admin.MovieManage.ScheduleScreen
+import com.example.app02.ui.Screens.admin.MovieManage.ShowtimeDetailScreen
 import com.example.app02.ui.Screens.user.ProfileScreen
 import com.example.app02.ui.Screens.user.TicketScreen
 import com.example.app02.ui.components.ConditionsScreen
@@ -46,7 +49,7 @@ fun AppNavGraph(
     revenueViewModel: RevenueViewModel,
     movieViewModel: MovieViewModel,
 
-) {
+    ) {
     val isLogged by loginViewModel.isLogged.collectAsState(initial = false)
     var role by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(Unit) {
@@ -64,7 +67,7 @@ fun AppNavGraph(
             else -> Screen.Login.route
         }
         NavHost(navController = navController, startDestination = startDestination) {
-            composable(Screen.TicketLayout.route){
+            composable(Screen.TicketLayout.route) {
 //                Ticket()
             }
             composable(Screen.SignUp.route) { SignupScreen(navController) }
@@ -77,6 +80,9 @@ fun AppNavGraph(
                     loginViewModel,
                     revenueViewModel
                 )
+            }
+            composable(Screen.Showtime.route) {
+                ScheduleScreen(loginViewModel, navController)
             }
 
 
@@ -143,7 +149,7 @@ fun AppNavGraph(
                     navController,
                     userViewModel,
                     dataStore,
-                    loginViewModel, ticketViewModel,  role.toString()
+                    loginViewModel, ticketViewModel, role.toString()
                 )
             }
             composable(Screen.MovieDetail.route) { backStackEntry ->
@@ -152,13 +158,50 @@ fun AppNavGraph(
                     MovieDetailScreen(movieId, navController, loginViewModel, role.toString())
                 }
             }
-            composable ("movie/{id}") { backStackEntry ->
+            composable("movie/{id}") { backStackEntry ->
                 val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
                 if (id != null) {
-                    MovieDetailScreen(id, navController,movieViewModel, loginViewModel)
+                    MovieDetailScreen(id, navController, movieViewModel, loginViewModel)
                 }
             }
-            composable(Screen.MovieManage.route) { MovieManageSceen(loginViewModel, navController) }
+            composable("showtime-detail/{movieId}") { entry ->
+                val context = LocalContext.current
+                val args = entry.arguments
+                if (args == null) {
+                    Toast.makeText(context, "Thiếu dữ liệu điều hướng", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
+                    return@composable
+                }
+                val id = args.getString("movieId")?.toIntOrNull()
+                if (id != null) {
+                    ShowtimeDetailScreen(id, navController, loginViewModel)
+                } else {
+                    Toast.makeText(context, "Không tìm thấy ID vé", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
+                }
+            }
+            composable(Screen.MovieManage.route) {
+                MovieManageScreen(
+                    loginViewModel,
+                    navController
+                )
+            }
+            composable("create_showtime/{movieId}") { entry ->
+                val context = LocalContext.current
+                val args = entry.arguments
+                if (args == null) {
+                    Toast.makeText(context, "Thiếu dữ liệu điều hướng", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
+                    return@composable
+                }
+                val id = args.getString("movieId")?.toIntOrNull()
+                if (id != null) {
+                    CreateScheduleScreen(id, loginViewModel, navController)
+                } else {
+                    Toast.makeText(context, "Không tìm thấy ID vé", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
+                }
+            }
             composable(
                 "ticket/{id}",
             ) { entry ->

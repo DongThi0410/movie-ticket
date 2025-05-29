@@ -133,14 +133,17 @@ class MovieViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     val msg = response.body()?.string() ?: "Thêm phim mới thành công"
                     newMovieState.value = NewMovieState(isLoading = false, msg)
+                    onResult(true)
                 } else {
-                    val msg = response.errorBody()?.string() ?: "Thêm phim mới thất "
+                    val msg = response.errorBody()?.string() ?: "Thêm phim mới thất bại"
                     newMovieState.value = NewMovieState(
                         isLoading = false, errorMessage = msg
                     )
+                    onResult(false)
                 }
             } catch (e: Exception) {
                 newMovieState.value = NewMovieState(isLoading = false, errorMessage = e.message)
+                onResult(false)
             }
         }
     }

@@ -37,6 +37,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.app02.data.DataStore
 import com.example.app02.network.api.TicketDTO
 import com.example.app02.ui.Screens.admin.MovieManage.NewMovieScreen
+import com.example.app02.ui.components.BoldTextComponent
 import com.example.app02.ui.components.CommonHeader
 import com.example.app02.ui.components.CommonScaffold
 import com.example.app02.ui.components.CustomTabRow
@@ -90,9 +91,15 @@ fun ProfileScreen(
                 when (selectedTabIndex) {
                     0 -> {
                         LazyColumn(
-                            modifier = Modifier.padding(10.dp),
+                            modifier = Modifier.padding(18.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
+                            item {
+                                Spacer(modifier = Modifier.padding(16.dp))
+                                BoldTextComponent("Thông tin tài khoản")
+                                Spacer(modifier = Modifier.padding(16.dp))
+                            }
+                            item { RowComponent("Tên tài khoản", it.name) }
                             item { RowComponent("Email", it.email) }
                             item { RowComponent("Số điện thoại", it.phone) }
                         }

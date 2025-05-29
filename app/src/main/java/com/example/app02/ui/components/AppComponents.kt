@@ -140,27 +140,23 @@ import com.example.app02.viewmodel.LoginState
 import com.example.app02.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
 
-
 @Composable
 fun CommonHeader(
-    title: String, navController: NavController,
+    title: String,
+    navController: NavController,
     rightIcon: (@Composable () -> Unit)? = null
 ) {
-
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(60.dp)
             .padding(WindowInsets.statusBars.asPaddingValues())
-            .background(color = headerColor),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .background(color = headerColor)
     ) {
-
+        // Nút Back bên trái
         IconButton(
-            onClick = {
-                navController.popBackStack()
-            }
+            onClick = { navController.popBackStack() },
+            modifier = Modifier.align(Alignment.CenterStart)
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
@@ -169,14 +165,24 @@ fun CommonHeader(
             )
         }
 
-        BoldTextComponent(title ?: "Loading...")
-        if (rightIcon != null) {
-            rightIcon()
-        } else {
-            Spacer(modifier = Modifier.size(48.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.align(Alignment.Center),
+            color = Color.White
+        )
+
+        rightIcon?.let {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+            ) {
+                it()
+            }
         }
     }
 }
+
 
 //@Preview
 //@Composable
@@ -684,6 +690,7 @@ fun CommonScaffold(
                         }
                 )
                 Spacer(modifier = Modifier.padding(16.dp))
+                if (role == "admin"){
                 Text(
                     "Quản lý phim", modifier = Modifier
                         .padding(16.dp)
@@ -692,6 +699,14 @@ fun CommonScaffold(
                             expanded = false
                         }
                 )
+                Text(
+                    "Quản lý suất chiếu", modifier = Modifier
+                        .padding(16.dp)
+                        .clickable {
+                            navController.navigate(Screen.Showtime.route)
+                            expanded = false
+                        }
+                )}
                 Box(modifier = Modifier) {
 
                     DropdownMenu(
